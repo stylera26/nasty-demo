@@ -1,0 +1,15 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: demo
+  annotations:
+    gatus.home-operations.com/enabled: "true"
+spec:
+  rules:
+    - host: demo.sty.ovh
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: {name: demo, port: {name: http}}

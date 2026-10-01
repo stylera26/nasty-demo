@@ -1,0 +1,8 @@
+# Besoins du projet, relus à chaque revue. Hausse au-dessus du plafond ou nouveau domaine : validation admin.
+quota: {cpu: "1", memory: 1Gi, storage: 1Gi}
+domains: []  # demo.sty.ovh est toujours autorisé
+options:
+  postgres: false
+  mongo: false
+  bucket: false
+  harbor: false

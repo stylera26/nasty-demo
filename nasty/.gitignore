@@ -1,0 +1,2 @@
+# exemple de secrets en clair : seul secrets.enc.yaml (chiffré SOPS) va dans le repo
+secrets.yaml
