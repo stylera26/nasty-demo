@@ -11,6 +11,7 @@ spec:
     metadata:
       labels: {app: demo}
     spec:
+      automountServiceAccountToken: false  # podinfo n'appelle pas l'API Kubernetes
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000  # podinfo déclare un utilisateur par nom : uid explicite
@@ -20,8 +21,6 @@ spec:
           image: "ghcr.io/stefanprodan/podinfo:6.15.0"
           ports:
             - {name: http, containerPort: 9898}
-          envFrom:
-            - secretRef: {name: demo-app, optional: true}
           readinessProbe:
             tcpSocket: {port: http}
           securityContext:
