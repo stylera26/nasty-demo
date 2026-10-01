@@ -5,3 +5,4 @@ portail (`k8s/`, `nasty/project.yaml`). Un push sur `main` est relu par le porta
 « nasty »), puis déployé par ArgoCD sur https://demo.sty.ovh.
 
 Test de bout en bout lancé le 01/10/2026 à 10:00.
+Deuxième passage le 01/10/2026 à 10:11 (Job de revue corrigé).
