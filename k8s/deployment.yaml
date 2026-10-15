@@ -4,28 +4,38 @@ metadata:
   name: demo
   labels: {app: demo}
 spec:
-  replicas: 1
+  replicas: 1  # comptes et invitations en mémoire : une seule réplique
   selector:
     matchLabels: {app: demo}
   template:
     metadata:
       labels: {app: demo}
     spec:
-      automountServiceAccountToken: false  # podinfo n'appelle pas l'API Kubernetes
+      automountServiceAccountToken: false
+      imagePullSecrets: [{name: demo-registry}]
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000  # podinfo déclare un utilisateur par nom : uid explicite
+        runAsUser: 1000
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: demo
-          image: "ghcr.io/stefanprodan/podinfo:6.15.0"
+          image: registry.sty.ovh/demo/app:sha-00000000
           ports:
-            - {name: http, containerPort: 9898}
+            - {name: http, containerPort: 3000}
+          env:
+            - {name: APP_URL, value: https://demo.sty.ovh}
+            - {name: SMTP_HOST, value: smtp.smtp.svc.cluster.local}
+            - {name: SMTP_PORT, value: "587"}
+            - {name: MAIL_FROM, value: noreply@sty.ovh}
+            - {name: OIDC_ISSUER, valueFrom: {secretKeyRef: {name: demo-sso, key: issuer}}}
+            - {name: OIDC_CLIENT_ID, valueFrom: {secretKeyRef: {name: demo-sso, key: client_id}}}
+            - {name: OIDC_CLIENT_SECRET, valueFrom: {secretKeyRef: {name: demo-sso, key: client_secret}}}
           readinessProbe:
-            tcpSocket: {port: http}
+            httpGet: {path: /healthz, port: http}
           securityContext:
             allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
             capabilities: {drop: ["ALL"]}
           resources:
-            requests: {cpu: 100m, memory: 128Mi}
-            limits: {cpu: 500m, memory: 256Mi}
+            requests: {cpu: 50m, memory: 64Mi}
+            limits: {cpu: 500m, memory: 128Mi}

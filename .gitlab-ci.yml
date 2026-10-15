@@ -1,0 +1,15 @@
+include:
+  - {project: nas-sty/devops/ci-templates, ref: main, file: base.yml}
+  - {project: nas-sty/devops/ci-templates, ref: main, file: docker-build.yml}
+stages: [build]
+
+variables:
+  PUSH_LATEST: "false"
+
+# Tests dans le Dockerfile. Image épinglée à la main dans k8s/deployment.yaml (sha-<court>).
+build-image:
+  stage: build
+  extends: [.docker-build, .on-release-or-mr]
+  variables:
+    IMAGE: registry.sty.ovh/demo/app
+    CONTEXT: app
