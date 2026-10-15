@@ -1,8 +1,10 @@
 # nasty-demo
 
-Projet jetable du test de bout en bout du portail nasty v2 : podinfo, infra générée par les modèles du
-portail (`k8s/`, `nasty/project.yaml`). Un push sur `main` est relu par le portail (check GitHub
-« nasty »), puis déployé par ArgoCD sur https://demo.sty.ovh.
+Démo du **compte unique** : https://demo.sty.ovh. L'app demande à Authentik « qui est cette personne ? »
+(OIDC, option Pilote `sso: {mode: oidc, public: true}`) ; Authentik gère connexion, inscription et MFA
+obligatoire sur `compte.demo.sty.ovh` (flux `compte-*` de nas-authentik). Les rôles et les invitations
+restent dans l'app (`app/server.mjs`, sans dépendance, comptes en mémoire).
 
-Test de bout en bout lancé le 01/10/2026 à 10:00.
-Deuxième passage le 01/10/2026 à 10:11 (Job de revue corrigé).
+- Test : `cd app && node test.mjs` (faux relais SMTP, faux Authentik), lancé aussi au build de l'image.
+- Inviter sans l'interface : `kubectl -n demo exec deploy/demo -- node server.mjs invite <e-mail> [rôle]`.
+- Admin de l'app = membre du groupe Authentik `authentik Admins`.

@@ -2,7 +2,12 @@
 quota: {cpu: "1", memory: 1Gi, storage: 1Gi}
 domains: []  # demo.sty.ovh est toujours autorisé
 options:
+  # Compte unique : tout compte Authentik, inscription ouverte, MFA obligatoire (flux compte-*).
+  # Les rôles et invitations sont gérés par l'app. Identifiants OIDC dans Vault apps/demo/sso.
+  sso: {mode: oidc, public: true}
   postgres: false
   mongo: false
   bucket: false
-  harbor: false
+  harbor: true  # images registry.sty.ovh/demo/
+  egress:
+    - {namespace: smtp, port: 587}  # mails d'invitation par le relais nas-smtp
