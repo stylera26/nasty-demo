@@ -1,6 +1,7 @@
 include:
   - {project: nas-sty/devops/ci-templates, ref: main, file: base.yml}
   - {project: nas-sty/devops/ci-templates, ref: main, file: docker-build.yml}
+  - {project: nas-sty/devops/ci-templates, ref: main, file: pilote.yml}  # annonce le build à Pilote (sans secret)
 stages: [build]
 
 variables:
