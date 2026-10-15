@@ -2,8 +2,10 @@
 // gérés par l'app. Aucune dépendance : http, crypto, net et fetch de Node.
 //   node server.mjs                       → serveur sur :3000
 //   node server.mjs invite <e-mail> [rôle] → envoie un mail d'invitation (sans passer par l'interface)
-// Variables : OIDC_ISSUER, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, APP_URL, SMTP_HOST, SMTP_PORT, MAIL_FROM, ADMIN_GROUP.
+// Variables : OIDC_ISSUER, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, APP_URL, SMTP_HOST, SMTP_PORT, MAIL_FROM, ADMIN_GROUP,
+// DATA_FILE (membres, invitations et clé de session ; sans elle, tout reste en mémoire).
 import { createHash, createHmac, randomBytes, timingSafeEqual } from "node:crypto";
+import { existsSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import http from "node:http";
 import net from "node:net";
 
@@ -12,11 +14,17 @@ const ISSUER = (env.OIDC_ISSUER ?? "").replace(/\/?$/, "/");
 const APP = (env.APP_URL ?? "https://demo.sty.ovh").replace(/\/$/, "");
 const ADMIN_GROUP = env.ADMIN_GROUP ?? "authentik Admins";
 const ROLES = ["membre", "éditeur", "admin"];
-const SECRET = randomBytes(32); // ponytail: sessions perdues au redémarrage ; clé dans un Secret si ça gêne
-
-// ponytail: comptes et invitations en mémoire (démo, 1 réplique) ; une vraie app les garde en base.
-const members = new Map(); // sub → {email, name, role, since}
-const invites = new Map(); // e-mail → {role, by, at}
+// ponytail: un fichier JSON réécrit à chaque changement (démo, 1 réplique) ; une vraie app prend une base.
+const FILE = env.DATA_FILE;
+const saved = FILE && existsSync(FILE) ? JSON.parse(readFileSync(FILE, "utf8")) : {};
+const SECRET = Buffer.from(saved.secret ?? randomBytes(32).toString("base64"), "base64");
+const members = new Map(saved.members); // sub → {email, name, role, since, via}
+const invites = new Map(saved.invites); // e-mail → {role, by, at}
+function save() {
+  if (!FILE) return;
+  writeFileSync(FILE + ".tmp", JSON.stringify({ secret: SECRET.toString("base64"), members: [...members], invites: [...invites] }));
+  renameSync(FILE + ".tmp", FILE); // jamais de fichier à moitié écrit
+}
 
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 const b64u = (b) => Buffer.from(b).toString("base64url");
@@ -75,6 +83,7 @@ async function callback(req, res, url) {
   if ((u.groups ?? []).includes(ADMIN_GROUP)) m.role = "admin";
   Object.assign(m, { email, name: u.name });
   members.set(u.sub, m);
+  save();
   setCookie(res, "s", { sub: u.sub, idt: tok.id_token, exp: Date.now() + 8 * 3600_000 }, 8 * 3600);
   res.writeHead(302, { Location: "/" }).end();
 }
@@ -174,6 +183,7 @@ async function invite(req, res) {
   try {
     await smtp(email, "Invitation à la démo Nasty", inviteText(email, role, m.name || m.email));
     invites.set(email, { role, by: m.name || m.email, at: Date.now() });
+    save();
     res.writeHead(303, { Location: "/?ok=" + encodeURIComponent(email) }).end();
   } catch (e) {
     console.error(e.message);

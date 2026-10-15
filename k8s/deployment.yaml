@@ -4,7 +4,8 @@ metadata:
   name: demo
   labels: {app: demo}
 spec:
-  replicas: 1  # comptes et invitations en mémoire : une seule réplique
+  replicas: 1  # données dans un fichier sur le volume : une seule réplique
+  strategy: {type: Recreate}  # volume RWO : l'ancien pod le libère avant le nouveau
   selector:
     matchLabels: {app: demo}
   template:
@@ -16,6 +17,7 @@ spec:
       securityContext:
         runAsNonRoot: true
         runAsUser: 1000
+        fsGroup: 1000  # volume inscriptible par l'utilisateur node
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: demo
@@ -27,9 +29,12 @@ spec:
             - {name: SMTP_HOST, value: smtp.smtp.svc.cluster.local}
             - {name: SMTP_PORT, value: "587"}
             - {name: MAIL_FROM, value: noreply@sty.ovh}
+            - {name: DATA_FILE, value: /data/demo.json}
             - {name: OIDC_ISSUER, valueFrom: {secretKeyRef: {name: demo-sso, key: issuer}}}
             - {name: OIDC_CLIENT_ID, valueFrom: {secretKeyRef: {name: demo-sso, key: client_id}}}
             - {name: OIDC_CLIENT_SECRET, valueFrom: {secretKeyRef: {name: demo-sso, key: client_secret}}}
+          volumeMounts:
+            - {name: data, mountPath: /data}
           readinessProbe:
             httpGet: {path: /healthz, port: http}
           securityContext:
@@ -39,3 +44,17 @@ spec:
           resources:
             requests: {cpu: 50m, memory: 64Mi}
             limits: {cpu: 500m, memory: 128Mi}
+      volumes:
+        - name: data
+          persistentVolumeClaim: {claimName: demo-data}
+---
+# Membres, invitations et clé de session de l'app.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: demo-data
+spec:
+  accessModes: [ReadWriteOnce]
+  storageClassName: longhorn
+  resources:
+    requests: {storage: 100Mi}

@@ -2,6 +2,9 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import http from "node:http";
+import { mkdtempSync, readFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import net from "node:net";
 
 const listen = (srv) => new Promise((r) => srv.listen(0, "127.0.0.1", () => r(srv.address().port)));
@@ -34,7 +37,7 @@ const oidcPort = await listen(http.createServer((req, res) => {
 }));
 iss = `http://127.0.0.1:${oidcPort}/application/o/demo/`;
 
-const env = { ...process.env, OIDC_ISSUER: iss, OIDC_CLIENT_ID: "demo", OIDC_CLIENT_SECRET: "x", SMTP_HOST: "127.0.0.1", SMTP_PORT: String(smtpPort), PORT: "3999", APP_URL: "http://127.0.0.1:3999" };
+const env = { ...process.env, OIDC_ISSUER: iss, OIDC_CLIENT_ID: "demo", OIDC_CLIENT_SECRET: "x", SMTP_HOST: "127.0.0.1", SMTP_PORT: String(smtpPort), DATA_FILE: join(mkdtempSync(join(tmpdir(), "demo-")), "data.json"), PORT: "3999", APP_URL: "http://127.0.0.1:3999" };
 const run = (args) => new Promise((ok, ko) => spawn("node", ["server.mjs", ...args], { env, stdio: "inherit", cwd: import.meta.dirname }).on("exit", (c) => (c ? ko(new Error("code " + c)) : ok())));
 
 // 1. Invitation en ligne de commande.
@@ -66,6 +69,10 @@ try {
   r = await fetch(A + "/invite", { method: "POST", redirect: "manual", headers: { cookie: s, origin: A, "content-type": "application/x-www-form-urlencoded" }, body: "email=Marie@Ex.fr&role=membre" });
   assert.equal(r.headers.get("location"), "/?ok=marie%40ex.fr");
   assert.match(mail, /To: <marie@ex\.fr>/);
+  // Membres et invitations gardés sur disque (redémarrage sans perte).
+  const d = JSON.parse(readFileSync(env.DATA_FILE, "utf8"));
+  assert.equal(new Map(d.invites).get("marie@ex.fr").role, "membre");
+  assert.equal(new Map(d.members).get("u1").role, "admin");
   // Mauvais état : refusé.
   r = await fetch(`${A}/callback?code=c&state=autre`, { headers: { cookie: oidc } });
   assert.equal(r.status, 400);
