@@ -1,8 +1,9 @@
 include:
   - {project: nas-sty/devops/ci-templates, ref: main, file: base.yml}
   - {project: nas-sty/devops/ci-templates, ref: main, file: docker-build.yml}
+  - {project: nas-sty/devops/ci-templates, ref: main, file: sbom.yml}
   - {project: nas-sty/devops/ci-templates, ref: main, file: pilote.yml}  # annonce le build à Pilote (sans secret)
-stages: [build]
+stages: [build, sbom]
 
 variables:
   PUSH_LATEST: "false"
@@ -14,3 +15,9 @@ build-image:
   variables:
     IMAGE: registry.sty.ovh/demo/app
     CONTEXT: app
+
+sbom:
+  stage: sbom
+  extends: .sbom
+  variables:
+    IMAGE: registry.sty.ovh/demo/app
