@@ -16,8 +16,8 @@ spec:
       imagePullSecrets: [{name: demo-registry}]
       securityContext:
         runAsNonRoot: true
-        runAsUser: 1000
-        fsGroup: 1000  # volume inscriptible par l'utilisateur node
+        runAsUser: 65532  # nonroot (distroless)
+        fsGroup: 65532  # nonroot (distroless)
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: demo
