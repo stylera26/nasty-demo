@@ -1,8 +1,8 @@
 include:
-  - {project: nas-sty/devops/ci-templates, ref: main, file: base.yml}
-  - {project: nas-sty/devops/ci-templates, ref: main, file: docker-build.yml}
-  - {project: nas-sty/devops/ci-templates, ref: main, file: jobs/sbom.yml}
-  - {project: nas-sty/devops/ci-templates, ref: main, file: pilote.yml}  # annonce le build à Pilote (sans secret)
+  - {project: nas-sty/devops/ci-templates, ref: audit/v1.0.0-includes-locaux, file: base.yml}
+  - {project: nas-sty/devops/ci-templates, ref: audit/v1.0.0-includes-locaux, file: docker-build.yml}
+  - {project: nas-sty/devops/ci-templates, ref: audit/v1.0.0-includes-locaux, file: jobs/sbom.yml}
+  - {project: nas-sty/devops/ci-templates, ref: audit/v1.0.0-includes-locaux, file: pilote.yml}  # annonce le build à Pilote (sans secret)
 stages: [build, sbom]
 
 variables:
