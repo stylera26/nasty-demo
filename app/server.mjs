@@ -1,6 +1,7 @@
 // Démo du compte unique : connexion par Authentik (OIDC, MFA imposé par Authentik), rôles et invitations
 // gérés par l'app. Aucune dépendance : http, crypto, net et fetch de Node.
 //   node server.mjs                       → serveur sur :3000
+// Livré par « bump dans la MR » (ci-templates v1.1.0, BUMP: mr) : image et digest arrivent sur main dans le même commit.
 //   node server.mjs invite <e-mail> [rôle] → envoie un mail d'invitation (sans passer par l'interface)
 // Variables : OIDC_ISSUER, OIDC_CLIENT_ID, OIDC_CLIENT_SECRET, APP_URL, SMTP_HOST, SMTP_PORT, MAIL_FROM, ADMIN_GROUP,
 // DATA_FILE (membres, invitations et clé de session ; sans elle, tout reste en mémoire).
