@@ -1,23 +1,9 @@
 include:
-  - {project: nas-sty/devops/ci-templates, ref: main, file: base.yml}
-  - {project: nas-sty/devops/ci-templates, ref: main, file: docker-build.yml}
-  - {project: nas-sty/devops/ci-templates, ref: main, file: jobs/sbom.yml}
-  - {project: nas-sty/devops/ci-templates, ref: main, file: pilote.yml}  # annonce le build à Pilote (sans secret)
-stages: [build, sbom]
+  - {project: nas-sty/devops/ci-templates, ref: v1, file: pipelines/image-only.yml}
+  - {project: nas-sty/devops/ci-templates, ref: v1, file: pilote.yml}  # annonce le build à Pilote (sans secret)
 
+# Tests dans le Dockerfile. Image construite sur la MR, digest écrit dans k8s/ par le job bump-mr (bump dans la MR).
 variables:
-  PUSH_LATEST: "false"
-
-# Tests dans le Dockerfile. Image épinglée à la main dans k8s/deployment.yaml (sha-<court>).
-build-image:
-  stage: build
-  extends: [.docker-build, .on-release-or-mr]
-  variables:
-    IMAGE: registry.sty.ovh/demo/app
-    CONTEXT: app
-
-sbom:
-  stage: sbom
-  extends: .sbom
-  variables:
-    IMAGE: registry.sty.ovh/demo/app
+  IMAGE: registry.sty.ovh/demo/app
+  CONTEXT: app
+  BUMP: mr
