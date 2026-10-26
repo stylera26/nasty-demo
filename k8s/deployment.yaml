@@ -21,7 +21,7 @@ spec:
         seccompProfile: {type: RuntimeDefault}
       containers:
         - name: demo
-          image: registry.sty.ovh/demo/app:sha-f37c801a@sha256:15e8ae3dd4b2180210dd9a42fb0f28fdabf3176b722879989a3b080b9f8df999
+          image: registry.sty.ovh/demo/app:sha-32a06a5f@sha256:15e8ae3dd4b2180210dd9a42fb0f28fdabf3176b722879989a3b080b9f8df999
           ports:
             - {name: http, containerPort: 3000}
           env:
