@@ -1,9 +1,0 @@
-include:
-  - {project: nas-sty/devops/ci-templates, ref: v1, file: pipelines/image-only.yml}
-  - {project: nas-sty/devops/ci-templates, ref: v1, file: pilote.yml}  # annonce le build à Pilote (sans secret)
-
-# Tests dans le Dockerfile. Image construite sur la MR, digest écrit dans k8s/ par le job bump-mr (bump dans la MR).
-variables:
-  IMAGE: registry.sty.ovh/demo/app
-  CONTEXT: app
-  BUMP: mr

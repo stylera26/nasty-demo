@@ -1,0 +1,36 @@
+# CI/CD Tekton (devops/cicd, pipeline livrer) : remplace GitLab CI (image-only + pilote.yml).
+# Tests dans le Dockerfile. bump=mr : sur la MR, image construite et poussée, digest écrit dans k8s/ ; la fusion vers
+# develop (test) apporte code + manifests + image ensemble. Tag vX.Y.Z posé sur develop : main (prod) avance jusqu'au tag.
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: livrer
+  annotations:
+    pipelinesascode.tekton.dev/on-event: "[pull_request, push]"
+    pipelinesascode.tekton.dev/on-target-branch: "[develop, refs/tags/v*]"
+    pipelinesascode.tekton.dev/max-keep-runs: "5"
+    pipelinesascode.tekton.dev/pipeline: "https://gitlab.com/nas-sty/devops/cicd/-/raw/v0.5.0/pipelines/livrer.yaml"
+spec:
+  pipelineRef: {name: livrer}
+  params:
+    - {name: url, value: "{{ repo_url }}"}
+    - {name: revision, value: "{{ revision }}"}
+    - {name: ref, value: "{{ source_branch }}"}
+    - {name: event, value: "{{ event_type }}"}
+    - {name: mr, value: "{{ pull_request_number }}"}
+    - {name: git-auth-secret, value: "{{ git_auth_secret }}"}
+    - {name: projet, value: styleran/lab/nasty-demo/nasty-demo}
+    - {name: type, value: aucun}            # tests dans le Dockerfile
+    - {name: image, value: registry.sty.ovh/demo/app}
+    - {name: context, value: app}
+    - {name: bump, value: mr}
+    - {name: infra-dir, value: k8s}
+    - {name: registry-secret, value: harbor-demo}
+    - {name: track-secret, value: dependency-track-demo}
+  workspaces:
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path   # nœud nasty : pas de Longhorn
+          accessModes: [ReadWriteOnce]
+          resources: {requests: {storage: 1Gi}}
