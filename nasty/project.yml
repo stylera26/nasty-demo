@@ -1,0 +1,9 @@
+# Contrat nasty/ v2 (nas-sty/delivery/cockpit, docs/nasty-v2.md), repris de nasty/project.yaml (v1, gardé tant que Pilote le lit).
+version: 2
+nom: demo
+resume: Démo de la plateforme NASTY (compte unique, invitations par mail)
+chemin: k8s          # hôte : demo.sty.ovh (par défaut)
+quota:
+  cpu: "1"
+  memoire: 1Gi
+  stockage: 1Gi

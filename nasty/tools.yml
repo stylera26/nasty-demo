@@ -1,0 +1,10 @@
+version: 2
+# Compte unique : tout compte Authentik, inscription ouverte, MFA obligatoire (flux compte-*).
+# Les rôles et invitations sont gérés par l'app. Identifiants OIDC dans Vault apps/demo/sso.
+sso:
+  mode: oidc
+  public: true
+harbor: true           # images registry.sty.ovh/demo/
+egress:
+  - namespace: smtp    # mails d'invitation par le relais nas-smtp ; accord admin
+    port: 587
