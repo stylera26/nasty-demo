@@ -15,6 +15,10 @@ spec:
     tasks:
       - name: echo
         taskSpec:
+          metadata:
+            labels:
+              pipelinesascode.tekton.dev/repository: autre-depot-via-tache
+              test-usurpation-tache: "oui"
           steps:
             - name: echo
               image: registry.sty.ovh/dockerhub/library/alpine:3.20
