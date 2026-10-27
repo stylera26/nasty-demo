@@ -9,7 +9,7 @@ metadata:
     pipelinesascode.tekton.dev/on-event: "[pull_request, push]"
     pipelinesascode.tekton.dev/on-target-branch: "[develop, refs/tags/v*]"
     pipelinesascode.tekton.dev/max-keep-runs: "5"
-    pipelinesascode.tekton.dev/pipeline: "https://gitlab.com/nas-sty/devops/cicd/-/raw/v0.5.0/pipelines/livrer.yaml"
+    pipelinesascode.tekton.dev/pipeline: "https://gitlab.com/nas-sty/devops/cicd/-/raw/v0.4.0/pipelines/livrer.yaml"
 spec:
   pipelineRef: {name: livrer}
   params:
@@ -26,7 +26,6 @@ spec:
     - {name: bump, value: mr}
     - {name: infra-dir, value: k8s}
     - {name: registry-secret, value: harbor-demo}
-    - {name: track-secret, value: dependency-track-demo}
   workspaces:
     - name: source
       volumeClaimTemplate:
