@@ -1,0 +1,20 @@
+# TEST jetable : un PipelineRun à côté de la fiche Repository.
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: test-repofile
+  annotations:
+    pipelinesascode.tekton.dev/on-event: "[pull_request]"
+    pipelinesascode.tekton.dev/on-target-branch: "[main]"
+    pipelinesascode.tekton.dev/max-keep-runs: "2"
+spec:
+  pipelineSpec:
+    tasks:
+      - name: echo
+        taskSpec:
+          steps:
+            - name: echo
+              image: registry.sty.ovh/dockerhub/library/alpine:3.20
+              script: |
+                #!/bin/sh
+                echo "test repofile"
