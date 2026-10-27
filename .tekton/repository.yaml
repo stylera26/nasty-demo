@@ -1,0 +1,7 @@
+# TEST jetable : fiche Repository dans .tekton/ (D-36) — PaC l'ignore-t-il ?
+apiVersion: pipelinesascode.tekton.dev/v1alpha1
+kind: Repository
+metadata:
+  name: styleran-lab-nasty-demo-nasty-demo
+spec:
+  concurrency_limit: 3
