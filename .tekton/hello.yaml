@@ -1,0 +1,23 @@
+# Pipeline minimale : prouve que Forgejo déclenche Tekton (Pipelines-as-Code). À remplacer par les vraies pipelines.
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: hello
+  annotations:
+    pipelinesascode.tekton.dev/on-event: "[pull_request, push]"
+    pipelinesascode.tekton.dev/on-target-branch: "[main]"
+    pipelinesascode.tekton.dev/max-keep-runs: "5"
+spec:
+  pipelineSpec:
+    tasks:
+      - name: hello
+        taskSpec:
+          steps:
+            - name: hello
+              image: registry.sty.ovh/dockerhub/library/alpine:3.20
+              computeResources:
+                requests: {cpu: 10m, memory: 16Mi}
+                limits: {memory: 64Mi}
+              script: |
+                #!/bin/sh
+                echo "Tekton nasty : {{ repo_url }} @ {{ revision }} ({{ event_type }})"
