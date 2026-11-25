@@ -1,0 +1,22 @@
+# Essai : pipeline commune « verifier » lue dans le dépôt cicd de Forgejo (et non plus sur gitlab.com).
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: commun
+  annotations:
+    pipelinesascode.tekton.dev/on-event: "[pull_request]"
+    pipelinesascode.tekton.dev/on-target-branch: "[main]"
+    pipelinesascode.tekton.dev/max-keep-runs: "3"
+    pipelinesascode.tekton.dev/pipeline: "https://forgejo.sty.ovh/nasty/cicd/raw/tag/v0.6.5/pipelines/verifier.yaml"
+spec:
+  pipelineRef: {name: verifier}
+  params:
+    - {name: nom, value: nasty-demo}
+    - {name: type, value: yaml}
+  workspaces:
+    - name: source
+      volumeClaimTemplate:
+        spec:
+          storageClassName: local-path
+          accessModes: [ReadWriteOnce]
+          resources: {requests: {storage: 1Gi}}
