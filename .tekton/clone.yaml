@@ -1,0 +1,37 @@
+# Preuve qu'un run récupère le code depuis Forgejo avec le jeton donné par Pipelines-as-Code (même étape que la tâche
+# git-clone de devops/cicd). À remplacer par la pipeline commune quand cicd sera sur Forgejo.
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  name: clone
+  annotations:
+    pipelinesascode.tekton.dev/on-event: "[pull_request, push]"
+    pipelinesascode.tekton.dev/on-target-branch: "[main]"
+    pipelinesascode.tekton.dev/max-keep-runs: "5"
+spec:
+  pipelineSpec:
+    tasks:
+      - name: clone
+        taskSpec:
+          steps:
+            - name: clone
+              image: registry.sty.ovh/dockerhub/alpine/git:v2.54.0
+              env:
+                - name: GIT_TOKEN
+                  valueFrom: {secretKeyRef: {name: "{{ git_auth_secret }}", key: git-provider-token}}
+                - {name: URL, value: "{{ repo_url }}.git"}
+                - {name: REVISION, value: "{{ revision }}"}
+              computeResources:
+                requests: {cpu: 100m, memory: 128Mi}
+                limits: {memory: 512Mi}
+              securityContext: {allowPrivilegeEscalation: false, capabilities: {drop: [ALL]}}
+              workingDir: /tmp
+              script: |
+                #!/bin/sh
+                set -eu
+                mkdir src && cd src
+                git init --quiet .
+                git remote add origin "https://oauth2:${GIT_TOKEN}@${URL#https://}"
+                git fetch --quiet --depth 1 origin "$REVISION"
+                git checkout --quiet FETCH_HEAD
+                echo "cloné depuis $URL : $(git rev-parse HEAD), $(git ls-files | wc -l) fichiers"
